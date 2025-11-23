@@ -19,38 +19,30 @@ var pageOrder;
 var music;
 
 window.onload = function () {
+    // Skip user selection, set Quebec City directly
+    CONFIG.selectedLocation = {
+        type: 'airport-code',   // or 'zip-code'
+        value: 'YQB'            // for postal code: 'G1A0A2'
+    };
 
-  CONFIG.addLocationOption('airport-code', 'Airport', 'ATL or KATL')
-  CONFIG.addLocationOption('zip-code', 'Postal', '00000')
+    CONFIG.addLocationOption('airport-code', 'Airport', 'ATL or KATL');
+    CONFIG.addLocationOption('zip-code', 'Postal', '00000');
 
-  CONFIG.addOption('crawlText', 'Crawl Text', 'Text that scrolls along the bottom')
-  CONFIG.addOption('greetingText', 'Greeting Text', 'Message (or joke) that appears at the start')
-  CONFIG.load();
-  preLoadMusic();
-  setMainBackground();
-  resizeWindow();
-  setClockTime();
-  if (!CONFIG.loop) {
-    getElement("settings-container").style.display = 'block';
-    guessZipCode();
-  }
+    CONFIG.addOption('crawlText', 'Crawl Text', 'Text that scrolls along the bottom');
+    CONFIG.addOption('greetingText', 'Greeting Text', 'Message (or joke) that appears at the start');
+
+    CONFIG.load();
+    preLoadMusic();
+    setMainBackground();
+    resizeWindow();
+    setClockTime();
+
+    if (!CONFIG.loop) {
+        getElement("settings-container").style.display = 'block';
+        guessZipCode();  // optional; might overwrite Quebec City
+    }
 }
 
-function toggleAdvancedSettings(){
-  let advancedSettingsOptions = getElement('advanced-settings-options')
-  let advancedOptionsText = getElement('advanced-options-text')
-
-  var advancedSettingsHidden = advancedSettingsOptions.classList.contains('hidden')
-
-  if(advancedSettingsHidden){
-    advancedSettingsOptions.classList.remove('hidden')
-    advancedOptionsText.innerHTML = 'Hide advanced options'
-  }
-  else{
-    advancedSettingsOptions.classList.add('hidden')
-    advancedOptionsText.innerHTML = 'Show advanced options'
-  }
-}
 
 function preLoadMusic(){
   var index = Math.floor(Math.random() * 12) + 1;
