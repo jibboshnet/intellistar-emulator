@@ -19,29 +19,38 @@ var pageOrder;
 var music;
 
 window.onload = function () {
-    // Skip user selection, set Quebec City directly
-    CONFIG.selectedLocation = {
-        type: 'airport-code',   // or 'zip-code'
-        value: 'YQB'            // for postal code: 'G1A0A2'
-    };
+    // Make sure CONFIG exists first
+    if (typeof CONFIG !== 'undefined') {
+        // Pre-select Quebec City
+        CONFIG.selectedLocation = {
+            type: 'airport-code', // or 'zip-code'
+            value: 'YQB'          // Quebec City airport code
+        };
 
-    CONFIG.addLocationOption('airport-code', 'Airport', 'ATL or KATL');
-    CONFIG.addLocationOption('zip-code', 'Postal', '00000');
+        // Add options as usual
+        CONFIG.addLocationOption('airport-code', 'Airport', 'ATL or KATL');
+        CONFIG.addLocationOption('zip-code', 'Postal', '00000');
 
-    CONFIG.addOption('crawlText', 'Crawl Text', 'Text that scrolls along the bottom');
-    CONFIG.addOption('greetingText', 'Greeting Text', 'Message (or joke) that appears at the start');
+        CONFIG.addOption('crawlText', 'Crawl Text', 'Text that scrolls along the bottom');
+        CONFIG.addOption('greetingText', 'Greeting Text', 'Message (or joke) that appears at the start');
 
-    CONFIG.load();
-    preLoadMusic();
-    setMainBackground();
-    resizeWindow();
-    setClockTime();
+        CONFIG.load();
+    } else {
+        console.error('CONFIG is not loaded yet!');
+    }
 
-    if (!CONFIG.loop) {
-        getElement("settings-container").style.display = 'block';
-        guessZipCode();  // optional; might overwrite Quebec City
+    preLoadMusic?.();
+    setMainBackground?.();
+    resizeWindow?.();
+    setClockTime?.();
+
+    if (!CONFIG?.loop) {
+        getElement("settings-container")?.style.display = 'block';
+        // Remove guessZipCode() if you want to keep Quebec City fixed
+        // guessZipCode?.();
     }
 }
+
 
 
 function preLoadMusic(){
