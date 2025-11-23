@@ -1,143 +1,115 @@
-window.CONFIG = {
-  crawl: `Thanks to all the contributors of this project. While it's not completely finished, the community effort has made this possible. Stars, contributions, and feedback are welcome and appreciated. Thanks for trying out this emulator.`,
-  greeting: 'This is your weather',
-  language: 'en-US', // Supported in TWC API
-  countryCode: 'US', // Supported in TWC API (for postal key)
-  units: 'e', // Supported in TWC API (e = English (imperial), m = Metric, h = Hybrid (UK)),
-  unitField: 'imperial', // Supported in TWC API. This field will be filled in automatically. (imperial = e, metric = m, uk_hybrid = h)
-  loop: false,
-  locationMode: "POSTAL",
+const latitude = 46.8139;
+const longitude = -71.2082;
+let CONFIG = {
+  language: 'en-US',
+  units: 'm', // metric for Canada
+  unitField: 'metric',
   secrets: {
-    // Possibly deprecated key: See issue #29
-    // twcAPIKey: 'd522aa97197fd864d36b418f39ebb323'
-    twcAPIKey: 'e1f10a1e78da46f5b10a1e78da96f525'
+    twcAPIKey: 'e1f10a1e78da46f5b10a1e78da96f525' // example key from your original code
   },
+  crawl: ''
+};
 
-  // Config Functions (index.html settings manager)
-  locationOptions:[],
-  addLocationOption: (id, name, desc) => {
-    CONFIG.locationOptions.push({
-      id,
-      name,
-      desc,
-    })
-  },
-  options: [],
-  addOption: (id, name, desc) => {
-    CONFIG.options.push({
-      id,
-      name,
-      desc,
-    })
-  },
-  submit: (btn, e) => {
-    let args = {}
-    const currentLoop = (localStorage.getItem('loop') === 'y')
-    CONFIG.locationOptions.forEach((opt) => {
-      args[opt.id] = getElement(`${opt.id}-text`).value
-      args[`${opt.id}-button`] = getElement(`${opt.id}-button`).checked
-      if (!currentLoop) {
-        localStorage.setItem(opt.id, args[opt.id])
-      }
-    })
-    args['countryCode'] = getElement('country-code-text').value
-    if (!currentLoop) {
-      localStorage.setItem('countryCode', args['countryCode'])
-    }
-    CONFIG.options.forEach((opt) => {
-      args[opt.id] = getElement(`${opt.id}-text`).value
-      if (!currentLoop) {
-        localStorage.setItem(opt.id, args[opt.id])
-      }
-    })
-    console.log(args)
-    if (currentLoop) {
-      if (localStorage.getItem('crawlText')) CONFIG.crawl = localStorage.getItem('crawlText')
-      if (localStorage.getItem('greetingText')) CONFIG.greeting = localStorage.getItem('greetingText')
-      if (localStorage.getItem('countryCode')) CONFIG.countryCode = localStorage.getItem('countryCode')
-    } else {
-      if (args.crawlText !== '') CONFIG.crawl = args.crawlText
-      if (args.greetingText !== '') CONFIG.greeting = args.greetingText
-      if (args.countryCode !== '') CONFIG.countryCode = args.countryCode
-      if (args.loop === 'y') CONFIG.loop = true
-    }
-    
-    if (args['airport-code-button']==true){ 
-      CONFIG.locationMode="AIRPORT" 
-      if(args['airport-code'].length==0){
-        alert("Please enter an airport code")
-        return
-      }
-    } 
-    else { 
-      CONFIG.locationMode="POSTAL" 
-      if(!currentLoop && args['zip-code'].length==0){
-        alert("Please enter a postal code")
-        return
-      }
+let alerts = [];
+let alertsActive = false;
+let forecastTemp = [], forecastIcon = [], forecastNarrative = [], forecastPrecip = [];
+let outlookHigh = [], outlookLow = [], outlookCondition = [], outlookIcon = [];
+let currentTemperature, currentCondition, windSpeed, gusts, feelsLike, visibility, humidity, dewPoint, pressure, pressureTrend, currentIcon;
+let cityName = "QueBEC City";
 
-    }
-    
-    zipCode = args['zip-code'] || localStorage.getItem('zip-code')
-    airportCode = args['airport-code'] || localStorage.getItem('airport-code')
-    
-    CONFIG.unitField = CONFIG.units === 'm' ? 'metric' : (CONFIG.units === 'h' ? 'uk_hybrid' : 'imperial')
-    fetchCurrentWeather();
-  },
-  load: () => {
-    let settingsPrompt = getElement('settings-prompt')
-    let advancedSettingsOptions = getElement('advanced-settings-options')
+async function fetchAlerts(){
+  try {
+    const res = await fetch(`https://api.weather.gov/alerts/active?point=${latitude},${longitude}`);
+    if(!res.ok){ console.warn("Alerts Error"); return; }
+    const data = await res.json();
 
-    //Advanced Options Setup
-    CONFIG.options.forEach((option) => {
-      //<div class="regular-text settings-item settings-text">Zip Code</div>
-      let label = document.createElement('div')
-        label.classList.add('strong-text', 'settings-item', 'settings-text', 'settings-padded')
-        label.style.textAlign='left'
-      label.appendChild(document.createTextNode(option.name))
-      label.id = `${option.id}-label`
-      //<input class="settings-item settings-text" type="text" id="zip-code-text">
-      let textbox = document.createElement('textarea')
-      textbox.classList.add('settings-item', 'settings-text', 'settings-input')
-      textbox.type = 'text'
-      textbox.style.fontSize = '20px'
-      textbox.placeholder = option.desc
-      textbox.id = `${option.id}-text`
-      textbox.style.maxWidth='320px'
-      textbox.style.minWidth='320px'
-      textbox.style.height='100px'
-      textbox.style.marginTop='10px'
-      if (localStorage.getItem(option.id)) textbox.value = localStorage.getItem(option.id)
-      let br = document.createElement('br')
-      advancedSettingsOptions.appendChild(label)
-      advancedSettingsOptions.appendChild(textbox)
-      advancedSettingsOptions.appendChild(br)
-      //<br>
-    })
+    alerts = [];
+    let alertCrawl = '';
 
-    let advancedButtonContainer = document.createElement('div')
-    advancedButtonContainer.classList.add('settings-container')
-    settingsPrompt.appendChild(advancedButtonContainer)
-    let advancedButton = document.createElement('button')
-    advancedButton.innerHTML = "Show advanced options"
-    advancedButton.id = "advanced-options-text"
-    advancedButton.setAttribute('onclick', 'toggleAdvancedSettings()')
-    advancedButton.classList.add('regular-text', 'settings-input', 'button')
-    advancedButtonContainer.appendChild(advancedButton)
-    //<button class="setting-item settings-text" id="submit-button" onclick="checkZipCode();" style="margin-bottom: 10px;">Start</button>-->
-    let btn = document.createElement('button')
-    btn.classList.add('setting-item', 'settings-text', 'settings-input', 'button')
-    btn.id = 'submit-button'
-    btn.onclick = CONFIG.submit
-    btn.style = 'margin-bottom: 10px;'
-    btn.appendChild(document.createTextNode('Start'))
-    settingsPrompt.appendChild(btn)
-    if (CONFIG.loop || localStorage.getItem('loop') === 'y') {
-      CONFIG.loop = true;
-      hideSettings();
-      CONFIG.submit()
+    if(data.features){
+      for(const feature of data.features){
+        alerts.push(feature.properties.event);
+        alertCrawl += " " + feature.properties.description.replace(/\.\.\./g, ' ').replace(/\*/g,'');
+      }
     }
+
+    if(alertCrawl) CONFIG.crawl = alertCrawl;
+    alertsActive = alerts.length > 0;
+    fetchForecast();
+  } catch(err){
+    console.error(err);
   }
 }
 
-CONFIG.unitField = CONFIG.units === 'm' ? 'metric' : (CONFIG.units === 'h' ? 'uk_hybrid' : 'imperial')
+async function fetchForecast(){
+  try {
+    const res = await fetch(`https://api.weather.com/v1/geocode/${latitude}/${longitude}/forecast/daily/10day.json?language=${CONFIG.language}&units=${CONFIG.units}&apiKey=${CONFIG.secrets.twcAPIKey}`);
+    if(!res.ok){ console.log("Forecast request error (example key)"); return; }
+    const data = await res.json();
+    const forecasts = data.forecasts;
+
+    let ns = [];
+    ns.push(forecasts[0].day || forecasts[0].night);
+    ns.push(forecasts[0].night);
+    ns.push(forecasts[1].day);
+    ns.push(forecasts[1].night);
+
+    for(let i=0; i<=3; i++){
+      let n = ns[i];
+      forecastTemp[i] = n.temp;
+      forecastIcon[i] = n.icon_code;
+      forecastNarrative[i] = n.narrative;
+      forecastPrecip[i] = `${n.pop}% Chance<br/> of ${n.precip_type.charAt(0).toUpperCase() + n.precip_type.slice(1).toLowerCase()}`;
+    }
+
+    for(let i=0; i<7; i++){
+      let fc = forecasts[i+1];
+      outlookHigh[i] = fc.max_temp;
+      outlookLow[i] = fc.min_temp;
+      outlookCondition[i] = (fc.day ? fc.day : fc.night).phrase_32char.split(' ').join('<br/>')
+        .replace("Thunderstorm","Thunder</br>storm");
+      outlookIcon[i] = (fc.day ? fc.day : fc.night).icon_code;
+    }
+
+    fetchRadarImages();
+  } catch(err){
+    console.error(err);
+  }
+}
+
+async function fetchCurrentWeather(){
+  try {
+    const res = await fetch(`https://api.weather.com/v1/geocode/${latitude}/${longitude}/observations/current.json?language=${CONFIG.language}&units=${CONFIG.units}&apiKey=${CONFIG.secrets.twcAPIKey}`);
+    if(!res.ok){ console.log("Current weather request error (example key)"); return; }
+    const data = await res.json();
+    const unit = data.observation[CONFIG.unitField];
+
+    currentTemperature = Math.round(unit.temp);
+    currentCondition = data.observation.phrase_32char;
+    windSpeed = `${data.observation.wdir_cardinal} ${unit.wspd} km/h`;
+    gusts = unit.gust || 'NONE';
+    feelsLike = unit.feels_like;
+    visibility = Math.round(unit.vis);
+    humidity = unit.rh;
+    dewPoint = unit.dewpt;
+    pressure = unit.altimeter.toPrecision(4);
+    pressureTrend = (data.observation.ptend_code==1 || data.observation.ptend_code==3) ? '▲' :
+                     data.observation.ptend_code==0 ? '' : '▼';
+    currentIcon = data.observation.icon_code;
+
+    fetchAlerts();
+  } catch(err){
+    console.error(err);
+  }
+}
+
+function fetchRadarImages(){
+  const radarContainer = document.getElementById('radar-container');
+  radarContainer.innerHTML = '';
+  const radarImage = document.createElement('iframe');
+
+  const mapSettings = btoa(JSON.stringify({
+    "agenda": { "id": "weather", "center":[longitude, latitude], "zoom":8 },
+    "animating": true,
+    "base": "standard",
+    "opacity": { "alerts":0.0, "local":0.0, "localStations":0.0, "national
