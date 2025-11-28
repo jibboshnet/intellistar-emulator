@@ -1,143 +1,80 @@
 window.CONFIG = {
-  crawl: `Thanks to all the contributors of this project. While it's not completely finished, the community effort has made this possible. Stars, contributions, and feedback are welcome and appreciated. Thanks for trying out this emulator.`,
-  greeting: 'This is your weather',
-  language: 'en-US', // Supported in TWC API
-  countryCode: 'US', // Supported in TWC API (for postal key)
-  units: 'e', // Supported in TWC API (e = English (imperial), m = Metric, h = Hybrid (UK)),
-  unitField: 'imperial', // Supported in TWC API. This field will be filled in automatically. (imperial = e, metric = m, uk_hybrid = h)
-  loop: false,
-  locationMode: "POSTAL",
+  crawl: `Choose the other good channel with Isles Television Network! Local forecasts and programming for Martinsburg, WV!`,
+
+  // Random greeting
+  greetingOptions: [
+    "This is your very sigma weather!!!!",
+    "Get ready for some weather magic!",
+    "Your forecast has arrived!",
+    "Stay informed, stay amazing!"
+  ],
+
+  greeting: '', // will set randomly
+  language: 'en-US',
+  countryCode: 'CA',
+  units: 'm',               // Celsius
+  unitField: 'metric',      // Celsius
+  loop: true,               // AUTO-START
+  locationMode: "AIRPORT",
   secrets: {
-    // Possibly deprecated key: See issue #29
-    // twcAPIKey: 'd522aa97197fd864d36b418f39ebb323'
     twcAPIKey: 'e1f10a1e78da46f5b10a1e78da96f525'
   },
 
-  // Config Functions (index.html settings manager)
-  locationOptions:[],
-  addLocationOption: (id, name, desc) => {
-    CONFIG.locationOptions.push({
-      id,
-      name,
-      desc,
-    })
-  },
+  locationOptions: [],
   options: [],
-  addOption: (id, name, desc) => {
-    CONFIG.options.push({
-      id,
-      name,
-      desc,
-    })
-  },
-  submit: (btn, e) => {
-    let args = {}
-    const currentLoop = (localStorage.getItem('loop') === 'y')
-    CONFIG.locationOptions.forEach((opt) => {
-      args[opt.id] = getElement(`${opt.id}-text`).value
-      args[`${opt.id}-button`] = getElement(`${opt.id}-button`).checked
-      if (!currentLoop) {
-        localStorage.setItem(opt.id, args[opt.id])
-      }
-    })
-    args['countryCode'] = getElement('country-code-text').value
-    if (!currentLoop) {
-      localStorage.setItem('countryCode', args['countryCode'])
-    }
-    CONFIG.options.forEach((opt) => {
-      args[opt.id] = getElement(`${opt.id}-text`).value
-      if (!currentLoop) {
-        localStorage.setItem(opt.id, args[opt.id])
-      }
-    })
-    console.log(args)
-    if (currentLoop) {
-      if (localStorage.getItem('crawlText')) CONFIG.crawl = localStorage.getItem('crawlText')
-      if (localStorage.getItem('greetingText')) CONFIG.greeting = localStorage.getItem('greetingText')
-      if (localStorage.getItem('countryCode')) CONFIG.countryCode = localStorage.getItem('countryCode')
-    } else {
-      if (args.crawlText !== '') CONFIG.crawl = args.crawlText
-      if (args.greetingText !== '') CONFIG.greeting = args.greetingText
-      if (args.countryCode !== '') CONFIG.countryCode = args.countryCode
-      if (args.loop === 'y') CONFIG.loop = true
-    }
-    
-    if (args['airport-code-button']==true){ 
-      CONFIG.locationMode="AIRPORT" 
-      if(args['airport-code'].length==0){
-        alert("Please enter an airport code")
-        return
-      }
-    } 
-    else { 
-      CONFIG.locationMode="POSTAL" 
-      if(!currentLoop && args['zip-code'].length==0){
-        alert("Please enter a postal code")
-        return
-      }
 
-    }
-    
-    zipCode = args['zip-code'] || localStorage.getItem('zip-code')
-    airportCode = args['airport-code'] || localStorage.getItem('airport-code')
-    
-    CONFIG.unitField = CONFIG.units === 'm' ? 'metric' : (CONFIG.units === 'h' ? 'uk_hybrid' : 'imperial')
+  addLocationOption: () => {},
+  addOption: () => {},
+
+  submit: () => {
+    CONFIG.locationMode = "AIRPORT";
+    airportCode = "YQB";  // Quebec City Airport
+    zipCode = null;
+
+    CONFIG.unitField = 'metric'; // Celsius
+
+    // Pick a random greeting from options
+    CONFIG.greeting = CONFIG.greetingOptions[Math.floor(Math.random() * CONFIG.greetingOptions.length)];
+
     fetchCurrentWeather();
+
+    // Override display name
+    setTimeout(() => {
+      const t1 = document.getElementById("infobar-location-text");
+      const t2 = document.getElementById("hello-location-text");
+
+      if (t1) t1.innerText = "Quebec City";
+      if (t2) t2.innerText = "Quebec City";
+
+      // Update greeting text
+      const greetingEl = document.getElementById("greeting-text");
+      if (greetingEl) greetingEl.innerText = CONFIG.greeting;
+
+      // Update units display (wind km/h, pressure hPa)
+      const windEl = document.getElementById("cc-wind");
+      if (windEl) {
+        let windText = windEl.innerText;
+        let speed = parseInt(windText.replace(/\D/g, '')) || 0;
+        windEl.innerText = `N ${Math.round(speed * 1.60934)} km/h`;
+      }
+
+      const pressureEl = document.getElementById("cc-pressure1");
+      const pressureDecimalEl = document.getElementById("cc-pressure2");
+      const pressureMetricEl = document.getElementById("cc-pressure-metric");
+      if (pressureEl && pressureDecimalEl && pressureMetricEl) {
+        let pressure = parseFloat(`${pressureEl.innerText}.${pressureDecimalEl.innerText}`) || 1013;
+        pressureEl.innerText = Math.floor(pressure * 33.8639 / 33.8639); // Already metric hPa
+        pressureDecimalEl.innerText = '';
+        pressureMetricEl.innerText = ' hPa';
+      }
+    }, 700);
   },
+
   load: () => {
-    let settingsPrompt = getElement('settings-prompt')
-    let advancedSettingsOptions = getElement('advanced-settings-options')
-
-    //Advanced Options Setup
-    CONFIG.options.forEach((option) => {
-      //<div class="regular-text settings-item settings-text">Zip Code</div>
-      let label = document.createElement('div')
-        label.classList.add('strong-text', 'settings-item', 'settings-text', 'settings-padded')
-        label.style.textAlign='left'
-      label.appendChild(document.createTextNode(option.name))
-      label.id = `${option.id}-label`
-      //<input class="settings-item settings-text" type="text" id="zip-code-text">
-      let textbox = document.createElement('textarea')
-      textbox.classList.add('settings-item', 'settings-text', 'settings-input')
-      textbox.type = 'text'
-      textbox.style.fontSize = '20px'
-      textbox.placeholder = option.desc
-      textbox.id = `${option.id}-text`
-      textbox.style.maxWidth='320px'
-      textbox.style.minWidth='320px'
-      textbox.style.height='100px'
-      textbox.style.marginTop='10px'
-      if (localStorage.getItem(option.id)) textbox.value = localStorage.getItem(option.id)
-      let br = document.createElement('br')
-      advancedSettingsOptions.appendChild(label)
-      advancedSettingsOptions.appendChild(textbox)
-      advancedSettingsOptions.appendChild(br)
-      //<br>
-    })
-
-    let advancedButtonContainer = document.createElement('div')
-    advancedButtonContainer.classList.add('settings-container')
-    settingsPrompt.appendChild(advancedButtonContainer)
-    let advancedButton = document.createElement('button')
-    advancedButton.innerHTML = "Show advanced options"
-    advancedButton.id = "advanced-options-text"
-    advancedButton.setAttribute('onclick', 'toggleAdvancedSettings()')
-    advancedButton.classList.add('regular-text', 'settings-input', 'button')
-    advancedButtonContainer.appendChild(advancedButton)
-    //<button class="setting-item settings-text" id="submit-button" onclick="checkZipCode();" style="margin-bottom: 10px;">Start</button>-->
-    let btn = document.createElement('button')
-    btn.classList.add('setting-item', 'settings-text', 'settings-input', 'button')
-    btn.id = 'submit-button'
-    btn.onclick = CONFIG.submit
-    btn.style = 'margin-bottom: 10px;'
-    btn.appendChild(document.createTextNode('Start'))
-    settingsPrompt.appendChild(btn)
-    if (CONFIG.loop || localStorage.getItem('loop') === 'y') {
-      CONFIG.loop = true;
-      hideSettings();
-      CONFIG.submit()
-    }
+    hideSettings();
+    CONFIG.submit();
   }
-}
+};
 
-CONFIG.unitField = CONFIG.units === 'm' ? 'metric' : (CONFIG.units === 'h' ? 'uk_hybrid' : 'imperial')
+// Ensure metric units
+CONFIG.unitField = 'metric';
