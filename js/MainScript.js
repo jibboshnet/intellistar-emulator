@@ -146,9 +146,7 @@ function setInformation(){
 }
 
 const wallpapers = [
-  "https://www.tripsavvy.com/thmb/PW-5bAHeH29JVM3ycyojFaM3cJw=/3862x2578/filters:no_upscale():max_bytes(150000):strip_icc()/quebec-city-skyline--canada-852985690-5ac4cea51f4e130036cec16a.jpg",
-  "https://www.pixelstalk.net/wp-content/uploads/2016/11/Desktop-Fog-Backgrounds.jpg",
-  "https://i0.wp.com/www.reverberations.net/wp-content/uploads/2021/10/quebec-waterfall.jpg",
+  "https://files.catbox.moe/qf6isj.jpg",
   "https://media.discordapp.net/attachments/1340011997659529268/1340011998825418793/WXCenter4k.png?ex=6933bf2c&is=69326dac&hm=090d9edc33bae2cf16a4d6676f162c4ce01855de1adb0767c7bffa6375403518&=&format=webp&quality=lossless&width=1890&height=1064"
 ];
 
