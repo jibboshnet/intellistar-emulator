@@ -10,8 +10,8 @@ window.CONFIG = {
 
   greetingOptions: [
     "This is your very sigma weather!!!!",
-    "Get ready for some weather magic!",
-    "Your forecast has arrived!",
+    "Please Jim Cantore I need this, my sim is kinda radar-less/",
+    "It's Weather time!",
     "Weather Ranch could never."
   ],
 
