@@ -1,9 +1,57 @@
 // Preset timeline sequences
-const MORNING = [{name: "Now", subpages: [{name: "current-page", duration: 9000}, {name: "radar-page", duration: 8000}]},{name: "Today", subpages: [{name: "today-page", duration: 10000}]},{name: "Tonight", subpages: [{name: "tonight-page", duration: 10000}]},{name: "Beyond", subpages: [{name: "tomorrow-page", duration: 10000}, {name: "7day-page", duration: 13000}]},]
-const NIGHT = [{name: "Now", subpages: [{name: "current-page", duration: 9000}, {name: "radar-page", duration: 8000}]},{name: "Tonight", subpages: [{name: "tonight-page", duration: 10000}]},{name: "Beyond", subpages: [{name: "tomorrow-page", duration: 10000}, {name: "tomorrow-night-page", duration: 10000}, {name: "7day-page", duration: 13000}]},]
-const SINGLE = [{name: "Alert", subpages: [{name: "single-alert-page", duration: 7000}]},{name: "Now", subpages: [{name: "current-page", duration: 8000}, {name: "radar-page", duration: 8000}, {name: "zoomed-radar-page", duration: 8000}]},{name: "Tonight", subpages: [{name: "tonight-page", duration: 8000}]},{name: "Beyond", subpages: [{name: "tomorrow-page", duration: 8000}, {name: "7day-page", duration: 13000}]},]
-const MULTIPLE = [{name: "Alerts", subpages: [{name: "multiple-alerts-page", duration: 7000}]},{name: "Now", subpages: [{name: "current-page", duration: 8000}, {name: "radar-page", duration: 8000}, {name: "zoomed-radar-page", duration: 8000}]},{name: "Tonight", subpages: [{name: "tonight-page", duration: 8000}]},{name: "Beyond", subpages: [{name: "tomorrow-page", duration: 8000}, {name: "7day-page", duration: 13000}]},]
-const WEEKDAY = ["SUN",  "MON", "TUES", "WED", "THU", "FRI", "SAT"];
+const MORNING = [
+  { name: "Now", subpages: [{ name: "current-page", duration: 9000 }] },
+  { name: "Today", subpages: [{ name: "today-page", duration: 10000 }] },
+  { name: "Tonight", subpages: [{ name: "tonight-page", duration: 10000 }] },
+  {
+    name: "Beyond",
+    subpages: [
+      { name: "tomorrow-page", duration: 10000 },
+      { name: "7day-page", duration: 13000 }
+    ]
+  },
+];
+
+const NIGHT = [
+  { name: "Now", subpages: [{ name: "current-page", duration: 9000 }] },
+  { name: "Tonight", subpages: [{ name: "tonight-page", duration: 10000 }] },
+  {
+    name: "Beyond",
+    subpages: [
+      { name: "tomorrow-page", duration: 10000 },
+      { name: "tomorrow-night-page", duration: 10000 },
+      { name: "7day-page", duration: 13000 }
+    ]
+  },
+];
+
+const SINGLE = [
+  { name: "Alert", subpages: [{ name: "single-alert-page", duration: 7000 }] },
+  { name: "Now", subpages: [{ name: "current-page", duration: 8000 }] },
+  { name: "Tonight", subpages: [{ name: "tonight-page", duration: 8000 }] },
+  {
+    name: "Beyond",
+    subpages: [
+      { name: "tomorrow-page", duration: 8000 },
+      { name: "7day-page", duration: 21000 } // +8000 to match total time
+    ]
+  },
+];
+
+const MULTIPLE = [
+  { name: "Alerts", subpages: [{ name: "multiple-alerts-page", duration: 7000 }] },
+  { name: "Now", subpages: [{ name: "current-page", duration: 8000 }] },
+  { name: "Tonight", subpages: [{ name: "tonight-page", duration: 8000 }] },
+  {
+    name: "Beyond",
+    subpages: [
+      { name: "tomorrow-page", duration: 8000 },
+      { name: "7day-page", duration: 21000 } // +8000 to match total time
+    ]
+  },
+];
+
+const WEEKDAY = ["SUN", "MON", "TUES", "WED", "THU", "FRI", "SAT"];
 
 const jingle = new Audio("assets/music/jingle.wav")
 
