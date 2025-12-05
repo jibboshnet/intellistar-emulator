@@ -80,6 +80,8 @@ function fetchForecast() {
                 outlookCondition[i] = outlookCondition[i].replace("Thunderstorm", "Thunder</br>storm");
                 outlookIcon[i] = (fc.day ? fc.day : fc.night).icon_code;
             }
+
+            fetchRadarImages();
         });
     });
 }
@@ -158,4 +160,44 @@ function fetchCurrentWeather() {
             });
         });
     });
+}
+
+// --- FETCH RADAR IMAGES ---
+function fetchRadarImages() {
+    radarImage = document.createElement("iframe");
+    radarImage.onerror = () => getElement('radar-container').style.display = 'none';
+
+    let mapSettings = btoa(JSON.stringify({
+        "agenda": { "id": "weather", "center": [longitude, latitude], "location": null, "zoom": 8 },
+        "animating": true,
+        "base": "standard",
+        "artcc": false, "county": false, "cwa": false, "rfc": false, "state": false, "menu": false, "shortFusedOnly": false,
+        "opacity": { "alerts": 0.0, "local": 0.0, "localStations": 0.0, "national": 0.6 }
+    }));
+
+    radarImage.setAttribute("src", "https://radar.weather.gov/?settings=v1_" + mapSettings);
+    radarImage.style.width = "1230px";
+    radarImage.style.height = "740px";
+    radarImage.style.marginTop = "-220px";
+    radarImage.style.overflow = "hidden";
+
+    if (alertsActive) {
+        let zoomedRadarImage = document.createElement("iframe");
+        zoomedRadarImage.onerror = () => getElement('zoomed-radar-container').style.display = 'none';
+
+        mapSettings = btoa(JSON.stringify({
+            "agenda": { "id": "weather", "center": [longitude, latitude], "location": null, "zoom": 10 },
+            "animating": true,
+            "base": "standard",
+            "artcc": false, "county": false, "cwa": false, "rfc": false, "state": false, "menu": false, "shortFusedOnly": false,
+            "opacity": { "alerts": 0.0, "local": 0.0, "localStations": 0.0, "national": 0.6 }
+        }));
+        zoomedRadarImage.setAttribute("src", "https://radar.weather.gov/?settings=v1_" + mapSettings);
+        zoomedRadarImage.style.width = "1230px";
+        zoomedRadarImage.style.height = "740px";
+        zoomedRadarImage.style.marginTop = "-220px";
+        zoomedRadarImage.style.overflow = "hidden";
+    }
+
+    scheduleTimeline();
 }
