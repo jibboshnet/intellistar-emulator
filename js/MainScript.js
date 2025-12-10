@@ -1,4 +1,3 @@
-// Preset timeline sequences
 const MORNING = [
   { name: "Now", subpages: [{ name: "current-page", duration: 9000 }] },
   { name: "Today", subpages: [{ name: "today-page", duration: 10000 }] },
