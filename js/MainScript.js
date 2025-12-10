@@ -146,7 +146,7 @@ function setInformation(){
 }
 
 const wallpapers = [
-  ""
+  "https://files.catbox.moe/9326hf.png"
 ];
 
 function setMainBackground() {
