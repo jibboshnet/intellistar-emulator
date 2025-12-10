@@ -146,8 +146,7 @@ function setInformation(){
 }
 
 const wallpapers = [
-  "https://files.catbox.moe/qf6isj.jpg",
-  "https://media.discordapp.net/attachments/1340011997659529268/1340011998825418793/WXCenter4k.png?ex=6933bf2c&is=69326dac&hm=090d9edc33bae2cf16a4d6676f162c4ce01855de1adb0767c7bffa6375403518&=&format=webp&quality=lossless&width=1890&height=1064"
+  "https://media.discordapp.net/attachments/1340011997659529268/1340011998825418793/WXCenter4k.png?ex=6933bf2c&is=69326dac&hm=090d9edc33bae2cf16a4d6676f162c4ce01855de1adb0767c7bffa6375403518&=&format=webp&quality=lossless&width=1280&height=720"
 ];
 
 function setMainBackground() {
