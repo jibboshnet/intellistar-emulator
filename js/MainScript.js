@@ -146,7 +146,7 @@ function setInformation(){
 }
 
 const wallpapers = [
-  "https://files.catbox.moe/5ri5ad.webp"
+  ""
 ];
 
 function setMainBackground() {
